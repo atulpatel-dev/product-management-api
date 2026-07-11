@@ -1,6 +1,7 @@
 const Product = require("../models/product")
 
 exports.getProducts = async (req, res) => {
+    throw new Error("Testing Global Error Handler");
     try {
         const product = await Product.find();
        return res.status(200).json(product);
