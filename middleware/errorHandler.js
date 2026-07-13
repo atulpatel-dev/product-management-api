@@ -1,9 +1,21 @@
-const errorHandler = (err , req , res , next)=>{
-    console.error(err.stack);
+const AppError = require("../utils/AppError");
 
-    res.status(500).json({
+const errorHandler = (err , req , res , next)=>{
+
+    if (err.name === "CastError") {
+        err = new AppError("Invalid Product ID", 400);
+    }
+    if (err.name === "ValidationError"){
+        const errors = Object.values(err.errors).map(val => val.message);
+
+        err = new AppError(errors.join(","), 400);
+    }
+
+    res.status(err.statusCode || 500).json({
         success: false , 
-        message: err.message
+        status: err.status || "error",
+        message: err.message || "Internal server error"
+
     })
 
 }

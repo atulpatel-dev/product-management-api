@@ -1,5 +1,6 @@
-const Product = require("../models/product")
-const asyncHandler = require("../utils/asyncHandler")
+const Product = require("../models/product");
+const asyncHandler = require("../utils/asyncHandler");
+const AppError = require("../utils/AppError");
 
 exports.getProducts = asyncHandler(async (req, res) => {
     const product = await Product.find();
@@ -18,7 +19,7 @@ exports.getsingleProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const product = await Product.findById(id);
     if (!product) {
-        return res.status(404).json({ message: "product not found" });
+        throw new AppError("Product not found " , 404)
     }
     return res.status(200).json(product);
 
@@ -32,7 +33,7 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     });
 
     if (!updatedProduct) {
-        return res.status(404).json({ message: "Prduct not found" })
+       throw new AppError("Product not found", 404);
     };
     return res.status(200).json(updatedProduct);
 
@@ -43,7 +44,7 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const deletedProduct = await Product.findByIdAndDelete(id);
     if (!deletedProduct) {
-        return res.status(404).json({ message: "page not found" });
+        throw new AppError("Product not found", 404);
 
     }
     return res.status(200).json({
