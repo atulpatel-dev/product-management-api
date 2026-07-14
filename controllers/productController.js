@@ -5,6 +5,7 @@ const AppError = require("../utils/AppError");
 exports.getProducts = asyncHandler(async (req, res) => {
 
     let query = {};
+    let sort = {};
 
     if (req.query.search) {
         query.title = {
@@ -12,14 +13,21 @@ exports.getProducts = asyncHandler(async (req, res) => {
             $options: "i"
         };
     }
-   const page = Number(req.query.page) || 1;
-const limit = Number(req.query.limit) || 5;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
 
-const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
+    if (req.query.sort) {
+       const field = req.query.sort.replace("-" , "");
+       const order = req.query.sort.startsWith("-")? -1 : 1;
+       sort[field] = order;
+    }
+    
     const product = await Product.find(query)
-    .skip(skip)
-    .limit(limit)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
     return res.status(200).json(product);
 });
 
@@ -35,7 +43,7 @@ exports.getsingleProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const product = await Product.findById(id);
     if (!product) {
-        throw new AppError("Product not found " , 404)
+        throw new AppError("Product not found ", 404)
     }
     return res.status(200).json(product);
 
@@ -49,7 +57,7 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     });
 
     if (!updatedProduct) {
-       throw new AppError("Product not found", 404);
+        throw new AppError("Product not found", 404);
     };
     return res.status(200).json(updatedProduct);
 
