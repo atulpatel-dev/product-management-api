@@ -4,7 +4,6 @@ const AppError = require("../utils/AppError");
 
 exports.getProducts = asyncHandler(async (req, res) => {
   
-
     let query = {};
     let sort = {};
 
@@ -35,12 +34,25 @@ exports.getProducts = asyncHandler(async (req, res) => {
         query.price.$lte = Number(req.query.maxPrice);
         }
     }
-    
+
+    const totalProduct = await  Product.countDocuments(query);
+    const totalPages =  Math.ceil(totalProduct / limit);
+    const currentPage = page
+    const hasNextPage = page < totalPages
+    const hasPreviousPage = page > 1
     const product = await Product.find(query)
         .sort(sort)
         .skip(skip)
         .limit(limit)
-    return res.status(200).json(product);
+    return res.status(200).json({
+        success: true,
+        totalProduct,
+        currentPage,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+        data: product
+    });
 });
 
 exports.createProduct = asyncHandler(async (req, res) => {
