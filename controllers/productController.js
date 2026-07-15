@@ -3,6 +3,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 
 exports.getProducts = asyncHandler(async (req, res) => {
+  
 
     let query = {};
     let sort = {};
@@ -22,6 +23,17 @@ exports.getProducts = asyncHandler(async (req, res) => {
        const field = req.query.sort.replace("-" , "");
        const order = req.query.sort.startsWith("-")? -1 : 1;
        sort[field] = order;
+    }
+
+    if(req.query.minPrice || req.query.maxPrice){
+        query.price = {};
+
+       if(req.query.minPrice) {
+            query.price.$gte = Number(req.query.minPrice);
+        }
+        if(req.query.maxPrice){
+        query.price.$lte = Number(req.query.maxPrice);
+        }
     }
     
     const product = await Product.find(query)
