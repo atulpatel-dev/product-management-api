@@ -5,7 +5,7 @@ const validate = require("../middleware/validate");
 const productSchema = require("../validators/productValidator");
 
 
-const {getProducts ,createProduct,getsingleProduct , updateProduct , deleteProduct } = require("../controllers/productController");
+const {getProducts ,createProduct, getsingleProduct , updateProduct , deleteProduct } = require("../controllers/productController");
 
 router.get("/", getProducts);
 

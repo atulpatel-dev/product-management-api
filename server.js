@@ -1,8 +1,12 @@
 require("dotenv").config()
 const express = require("express");
 const app = express();
+
 const connectDB = require("./config/db");
-const router = require("./routes/productRoutes");
+
+const productRoute = require("./routes/productRoutes");
+const authRoute = require("./routes/authRoutes");
+
 const logger = require("./middleware/logger");
 const errorHandler = require("./middleware/errorHandler");
 const AppError = require("./utils/AppError");
@@ -11,7 +15,8 @@ app.use(express.json());
 
 app.use(logger);
 
-app.use("/products" , router)
+app.use("/products" , productRoute)
+app.use("/users", authRoute);
 
 app.get("/" , (req , res)=>{
     res.send("status clear")
