@@ -56,7 +56,12 @@ exports.getProducts = asyncHandler(async (req, res) => {
 });
 
 exports.createProduct = asyncHandler(async (req, res) => {
-    const product = new Product(req.body);
+
+    
+    const product = new Product({
+        ...req.body,
+        owner: req.user.id,
+    });
     await product.save();
     return res.status(201).json(product);
 
@@ -74,27 +79,44 @@ exports.getsingleProduct = asyncHandler(async (req, res) => {
 });
 
 exports.updateProduct = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
 
-    const { id } = req.params;
-    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
-        runValidators: true, new: true
-    });
-
-    if (!updatedProduct) {
-        throw new AppError("Product not found", 404);
+    if(!product){
+        throw new AppError("product not found", 404);
     };
-    return res.status(200).json(updatedProduct);
+
+    if(product.owner.toString() !== req.user.id){
+        throw new AppError("Forbidden", 403);
+    };
+
+    product.title = req.body.title;
+    product.description = req.body.description;
+    product.price  = req.body.price;
+
+    await product.save();
+    return res.status(200).json({
+        success: true,
+        message: "product update succesfully",
+        product,
+    })
+
 
 });
 
 exports.deleteProduct = asyncHandler(async (req, res) => {
 
-    const { id } = req.params;
-    const deletedProduct = await Product.findByIdAndDelete(id);
-    if (!deletedProduct) {
-        throw new AppError("Product not found", 404);
+   const product = await Product.findById(req.params.id);
 
-    }
+   if(!product){
+    throw new AppError("Product not found" , 404);
+   }
+
+   if(product.owner.toString()  !== req.user.id){
+    throw new AppError("Forbidden" ,403);
+   };
+
+   await product.deleteOne();
+   
     return res.status(200).json({
         success: true,
         message: "Product deleted successfully"
