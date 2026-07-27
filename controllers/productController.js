@@ -75,9 +75,7 @@ exports.getsingleProduct = asyncHandler(async (req, res) => {
         throw new AppError("Product not found ", 404)
     }
     return res.status(200).json(product);
-
-});
-
+})
 exports.updateProduct = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
 

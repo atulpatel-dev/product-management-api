@@ -5,19 +5,19 @@ const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 const User = require("../models/user")
 
-exports.registerUser = asyncHandler(async(req , res)=>{
-    
-    const { name , email , password} = req.body;
+exports.registerUser = asyncHandler(async (req, res) => {
 
-    const existingUser = await User.findOne({email});
-    if(existingUser){
-        throw new AppError("Email already exist" , 400);
+    const { name, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new AppError("Email already exist", 400);
     }
 
-    const hashPassword = await bcrypt.hash(password ,10);
+    const hashPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
-        name, 
+        name,
         email,
         password: hashPassword,
     });
@@ -30,24 +30,27 @@ exports.registerUser = asyncHandler(async(req , res)=>{
     })
 })
 
-exports.loginUser = asyncHandler(async(req , res)=>{
+exports.loginUser = asyncHandler(async (req, res) => {
 
-    const {email , password} = req.body;
+    const { email, password } = req.body;
 
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
 
-    if(!user){
-        throw new AppError("Invalid email or password" , 401)
+    if (!user) {
+        throw new AppError("Invalid email or password", 401)
     }
 
-    const isMatching = await bcrypt.compare(password , user.password);
+    const isMatching = await bcrypt.compare(password, user.password);
 
-    if(!isMatching){
-        throw new AppError("Invalid email or password" , 401);
+    if (!isMatching) {
+        throw new AppError("Invalid email or password", 401);
     }
 
     const token = jwt.sign(
-        {id: user._id},
+        { 
+            id: user._id ,
+            role: user.role,
+        },
         process.env.JWT_SECRET,
         {
             expiresIn: "7d"
@@ -62,16 +65,29 @@ exports.loginUser = asyncHandler(async(req , res)=>{
 })
 
 
-exports.getProfile = asyncHandler(async(req  , res)=>{
+exports.getProfile = asyncHandler(async (req, res) => {
 
     const user = await User.findById(req.user.id).select("-password");
 
-    if(!user){
-        throw new AppError("user not found " , 404);
+    if (!user) {
+        throw new AppError("user not found ", 404);
     }
 
     return res.status(200).json({
         success: true,
         user,
+    })
+});
+
+
+// get All users
+
+exports.getAllUsers = asyncHandler(async(req, res)=>{
+
+    const users = await User.find().select("-password");
+
+    return res.status(200).json({
+        success: true,
+        users,
     })
 })
