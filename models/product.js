@@ -16,6 +16,10 @@ const productSchema  = new Schema({
         type: Number,
         required: true,
     },
+    image: {
+        url: String,
+        filename: String,
+    },
 
     owner: {
         type: mongoose.Schema.Types.ObjectId,
